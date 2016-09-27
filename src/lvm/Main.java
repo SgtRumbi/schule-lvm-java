@@ -26,6 +26,7 @@ public class Main extends Application {
     private HBox labelsBox;
     private Label labelOutput, labelFillSequence;
     private Queue<Integer> fillSequenceQueue = new ArrayDeque<>();
+    private List<Integer> fillSequenceInfoList = new ArrayList<>();
 
     // CLASS METHODS
     private GridPane createInputContainer(String labelText, final TextField textField) {
@@ -39,8 +40,8 @@ public class Main extends Application {
         return gridPane;
     }
 
-    private TextField createInputField(String hint) {
-        final TextField textField = new TextField();
+    private TextField createInputField(String hint, int defaultValue) {
+        final TextField textField = new TextField(String.valueOf(defaultValue));
         textField.setPromptText(hint);
         textField.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -121,7 +122,7 @@ public class Main extends Application {
 
     private void updateFillSequenceLabel() {
         String string = "";
-        List<Integer> backup = new ArrayList<>();
+        /* List<Integer> backup = new ArrayList<>();
         for (int i = 0; i < fillSequenceQueue.size(); i++) {
             int result = fillSequenceQueue.poll();
             string += result + ", ";
@@ -130,6 +131,9 @@ public class Main extends Application {
 
         for (int i : backup) {
             fillSequenceQueue.add(i);
+        } */
+        for (int i : fillSequenceInfoList) {
+            string += i + ", ";
         }
 
         labelFillSequence.setText(string);
@@ -137,9 +141,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final TextField textFieldMaxBalloonsInPackage = createInputField("z. B. 20");
-        final TextField textFieldMaxBalloonsInCompartment = createInputField("z. B. 15");
-        final TextField textFieldMaxCompartments = createInputField("z. B. 10");
+        final TextField textFieldMaxBalloonsInPackage = createInputField("z. B. 20", 20);
+        final TextField textFieldMaxBalloonsInCompartment = createInputField("z. B. 15", 10);
+        final TextField textFieldMaxCompartments = createInputField("z. B. 10", 10);
 
         labelOutput = new Label("Output: -");
         labelOutput.setBackground(new Background(new BackgroundFill(new Color(0.9, 0.7, 0.7, 1.0), new CornerRadii(12), new Insets(2))));
@@ -154,46 +158,52 @@ public class Main extends Application {
             public void handle(ActionEvent event) {
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
                 int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
-                if (fillSequenceQueue.size() != 0) {
-                    System.out.println("Deque size: " + fillSequenceQueue.size());
+                System.out.println("Deque size: " + fillSequenceQueue.size());
 
-                    // Get the array from the deque
-                    int[] array;
-                    if (fillSequenceQueue.size() >= compartmentsCount) {
-                        array = new int[compartmentsCount];
-                    } else {
-                        array = new int[fillSequenceQueue.size()];
+                // Get the array from the already generated lars
+                int[] array = new int[labelArrayReferences.size()];
+                for (int i = 0; i < labelArrayReferences.size(); i++) {
+                    array[i] = labelArrayReferences.get(i).value;
+                }
+                /* if (fillSequenceQueue.size() >= compartmentsCount) {
+                    array = new int[compartmentsCount];
+                } else {
+                    array = new int[fillSequenceQueue.size()];
+                }
+
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = fillSequenceQueue.poll();
+                } */
+
+                echoArray(array);
+
+                // Calculate result
+                LVMResult result = LVM.lvmCalculate(array, maxBalloonsInPackage);
+
+                // Mark all labels to non clear
+                for (LabelArrayReference lar : labelArrayReferences) {
+                    lar.setClearing(false);
+                }
+
+                // Mark labels to clear
+                for (int i = 0; i < result.lastMatch.length; i++) {
+                    LVMLastMatchItem item = result.lastMatch[i];
+                    labelArrayReferences.get(item.key).setClearing(true);
+                }
+
+                // Set output
+                setOutput(result);
+
+                for (LabelArrayReference lar : labelArrayReferences) {
+                    if (lar.isClearing()) {
+                        System.out.println("Fill s q: " + fillSequenceQueue);
+                        int nextItem = fillSequenceQueue.poll();
+                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                        lar.update(nextItem);
                     }
+                }
 
-                    for (int i = 0; i < array.length; i++) {
-                        array[i] = fillSequenceQueue.poll();
-                    }
-
-                    echoArray(array);
-
-                    // Calculate result
-                    LVMResult result = LVM.lvmCalculate(array, maxBalloonsInPackage);
-
-                    // Mark all labels to non clear
-                    for (LabelArrayReference lar : labelArrayReferences) {
-                        lar.setClearing(false);
-                    }
-
-                    // Mark labels to clear
-                    for (int i = 0; i < result.lastMatch.length; i++) {
-                        LVMLastMatchItem item = result.lastMatch[i];
-                        labelArrayReferences.get(item.key).setClearing(true);
-                    }
-
-                    // Set output
-                    setOutput(result);
-
-                    for (LabelArrayReference lar : labelArrayReferences) {
-                        if (lar.isClearing()) {
-                            lar.update(fillSequenceQueue.poll());
-                        }
-                    }
-                } else System.out.println("Random array is null...");
+                updateFillSequenceLabel();
             }
         });
 
@@ -211,11 +221,13 @@ public class Main extends Application {
 
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
-                fillSequenceQueue.add(randomValue);
 
                 // If there are not enough compartments, add a new
                 if (labelArrayReferences.size() < compartmentCount) {
-                    labelArrayReferences.add(new LabelArrayReference(createItem(), fillSequenceQueue.size(), fillSequenceQueue.poll()));
+                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), randomValue));
+                } else {
+                    fillSequenceQueue.add(randomValue);
+                    fillSequenceInfoList.add(randomValue);
                 }
 
                 System.out.println("Adding random to deque. size: " + fillSequenceQueue.size());
@@ -227,6 +239,7 @@ public class Main extends Application {
                 for (int i = 0; i < randomArray[0].length; i++) {
                     labelArrayReferences.add(new LabelArrayReference(createItem(), i, randomArray[0][i]));
                 } */
+
                 showLabels();
             }
         });
