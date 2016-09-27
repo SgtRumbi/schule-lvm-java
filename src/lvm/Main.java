@@ -19,12 +19,12 @@ import java.util.*;
  */
 public class Main extends Application {
     // FIELDS
-    private int inputMaxBalloonsInPackage = 0;
+    /* private int inputMaxBalloonsInPackage = 0;
     private int inputMaxBalloonsInCompartment = 0;
-    private int inputCompartmentsCount = 0;
+    private int inputCompartmentsCount = 0; */
     private final List<LabelArrayReference> labelArrayReferences = new ArrayList<>();
     private HBox labelsBox;
-    private Label labelOutput;
+    private Label labelOutput, labelFillSequence;
     private Queue<Integer> fillSequenceQueue = new ArrayDeque<>();
 
     // CLASS METHODS
@@ -119,6 +119,22 @@ public class Main extends Application {
         labelOutput.setText("Output: " + add + " = " + value + ", Überschuss: " + result.finalTolerance);
     }
 
+    private void updateFillSequenceLabel() {
+        String string = "";
+        List<Integer> backup = new ArrayList<>();
+        for (int i = 0; i < fillSequenceQueue.size(); i++) {
+            int result = fillSequenceQueue.poll();
+            string += result + ", ";
+            backup.add(result);
+        }
+
+        for (int i : backup) {
+            fillSequenceQueue.add(i);
+        }
+
+        labelFillSequence.setText(string);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         final TextField textFieldMaxBalloonsInPackage = createInputField("z. B. 20");
@@ -171,28 +187,40 @@ public class Main extends Application {
 
                     // Set output
                     setOutput(result);
+
+                    for (LabelArrayReference lar : labelArrayReferences) {
+                        if (lar.isClearing()) {
+                            lar.update(fillSequenceQueue.poll());
+                        }
+                    }
                 } else System.out.println("Random array is null...");
             }
         });
 
         Label labelFillSequenceDescription = new Label("Füllfolge: ");
-        Label labelFillSequence = new Label("-");
+        labelFillSequence = new Label("-");
         Button updateFillSequence = new Button("Anpassen");
         Button randomFillSequence = new Button("Zufällig");
         randomFillSequence.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 int maxBalloonsInCompartment = Integer.valueOf(textFieldMaxBalloonsInCompartment.getText());
-                // int maxCompartments = Integer.valueOf(textFieldMaxCompartments.getText());
+                int compartmentCount = Integer.valueOf(textFieldMaxCompartments.getText());
 
                 System.out.println("Adding random to deque. size: " + fillSequenceQueue.size());
 
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
                 fillSequenceQueue.add(randomValue);
-                labelArrayReferences.add(new LabelArrayReference(createItem(), fillSequenceQueue.size(), randomValue));
+
+                // If there are not enough compartments, add a new
+                if (labelArrayReferences.size() < compartmentCount) {
+                    labelArrayReferences.add(new LabelArrayReference(createItem(), fillSequenceQueue.size(), fillSequenceQueue.poll()));
+                }
 
                 System.out.println("Adding random to deque. size: " + fillSequenceQueue.size());
+
+                updateFillSequenceLabel();
 
                 /* randomArray[0] = generateRandomFilledArray(maxCompartments, maxBalloonsInCompartment);
                 labelArrayReferences.clear();
