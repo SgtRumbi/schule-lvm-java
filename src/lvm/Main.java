@@ -251,12 +251,41 @@ public class Main extends Application {
         Label labelFillSequenceDescription = new Label("Füllfolge: ");
         labelFillSequence = new Label("-");
         Button updateFillSequence = new Button("Anpassen");
+        updateFillSequence.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final Stage dialogStage = new Stage(StageStyle.DECORATED);
+
+                Button submit = new Button("Ok");
+                submit.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+
+                    }
+                });
+                Button cancel = new Button("Abbrechen");
+                cancel.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.show();
+                        dialogStage.hide();
+                    }
+                });
+
+                VBox root = new VBox(new Label("Wert zum Hinzufügen:"), new HBox(submit, cancel));
+
+                primaryStage.hide();
+                dialogStage.setScene(new Scene(root, 200, 200));
+                dialogStage.setAlwaysOnTop(true);
+                dialogStage.show();
+            }
+        });
         Button randomFillSequence = new Button("Zufällig");
         randomFillSequence.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 int maxBalloonsInCompartment = Integer.valueOf(textFieldMaxBalloonsInCompartment.getText());
-                int compartmentCount = Integer.valueOf(textFieldMaxCompartments.getText());
+                // int compartmentCount = Integer.valueOf(textFieldMaxCompartments.getText());
 
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
@@ -303,11 +332,6 @@ public class Main extends Application {
                 dialogStage.setScene(new Scene(root, 200, 200));
                 dialogStage.setAlwaysOnTop(true);
                 dialogStage.show();
-                /* alert.setTitle("Wert-Eingabe");
-                alert.setHeaderText("Neuer Wert");
-                String s = "This is an example of JavaFX 8 Dialogs... ";
-                alert.setContentText(s);
-                alert.getDialogPane().getChildren().addAll(new Button("Test")); */
             }
         });
 
