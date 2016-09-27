@@ -17,14 +17,14 @@ public class LVM {
 
         // TODO: 27.09.2016 Add nextToReqPckgSize!
         do {
-            for (int possibility = 0; possibility < Math.pow(2, baseArray.length); possibility++) {
+            for (int possibility = 0; possibility < 1 << baseArray.length; possibility++) {
                 sum = 0;
                 // Last match ++
                 // int lastMatchCounter = 0;
                 // lastMatch = new int[baseArray.length];
                 lastMatchesList.clear();
                 for (int elementIndex = 0; elementIndex < baseArray.length; elementIndex++) {
-                    int possibilityAndElementIndexPos = possibility & (int) Math.pow(2, elementIndex);
+                    int possibilityAndElementIndexPos = possibility & (1 << elementIndex);
 
                     if (possibilityAndElementIndexPos != 0) {
                         // Add elementIndex to lastMatch

@@ -29,7 +29,7 @@ public class Main extends Application {
     private final List<LabelArrayReference> labelArrayReferences = new CopyOnWriteArrayList<>();
     private HBox labelsBox;
     private Label labelOutput, labelFillSequence;
-    private Queue<Integer> fillSequenceQueue = new ArrayDeque<>();
+    // private Queue<Integer> fillSequenceQueue = new ArrayDeque<>();
     private List<Integer> fillSequenceInfoList = new ArrayList<>();
 
     // CLASS METHODS
@@ -76,12 +76,13 @@ public class Main extends Application {
             this.index = index;
             this.value = value;
 
-            label.setText(index + ": " + value);
+            update(value);
         }
 
         public void update(int newValue) {
             this.value = newValue;
-            label.setText(index + ": " + value);
+            label.setText(value + "");
+            // label.setText(index + ": " + value);
         }
 
         public void setClearing(boolean clearing) {
@@ -107,8 +108,10 @@ public class Main extends Application {
 
     private void showLabels() {
         labelsBox.getChildren().clear();
+        int i = 0;
         for (LabelArrayReference lar : labelArrayReferences) {
             labelsBox.getChildren().add(lar.getLabel());
+            lar.index = i++;
         }
     }
 
@@ -144,7 +147,7 @@ public class Main extends Application {
         if (labelArrayReferences.size() < compartmentsCount) {
             labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), value));
         } else {
-            fillSequenceQueue.add(value);
+            // fillSequenceQueue.add(value);
             fillSequenceInfoList.add(value);
         }
 
@@ -200,6 +203,7 @@ public class Main extends Application {
                 // Set output
                 setOutput(result);
 
+                showLabels();
                 updateFillSequenceLabel();
 
                 buttonCalculate.setDisable(true);
@@ -216,10 +220,14 @@ public class Main extends Application {
                         lar.getLabel().setVisible(false);
                         labelArrayReferences.remove(lar);
 
-                        if (fillSequenceQueue.size() > 0) {
+                        /* if (fillSequenceQueue.size() > 0) {
                             int value = fillSequenceQueue.poll();
-                            labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1,
-                                    value));
+                            labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1, value));
+                            fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                        } */
+                        if (fillSequenceInfoList.size() > 0) {
+                            int value = fillSequenceInfoList.get(fillSequenceInfoList.size() - 1);
+                            labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1, value));
                             fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
                         }
                     }
