@@ -1,7 +1,6 @@
 package lvm;
 
 import javafx.application.Application;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -67,7 +66,7 @@ public class Main extends Application {
         return sampleItem;
     }
 
-    final class LabelArrayReference {
+    private final class LabelArrayReference {
         private Label label;
         private boolean clearing = false;
         private int index, value;
@@ -106,39 +105,6 @@ public class Main extends Application {
         }
     }
 
-    public static class DataObject {
-        SimpleIntegerProperty index, value;
-
-        public DataObject(int index, int value) {
-            this.index = new SimpleIntegerProperty(index);
-            this.value = new SimpleIntegerProperty(value);
-        }
-
-        public int getIndex() {
-            return index.get();
-        }
-
-        public SimpleIntegerProperty indexProperty() {
-            return index;
-        }
-
-        public void setIndex(int index) {
-            this.index.set(index);
-        }
-
-        public int getValue() {
-            return value.get();
-        }
-
-        public SimpleIntegerProperty valueProperty() {
-            return value;
-        }
-
-        public void setValue(int value) {
-            this.value.set(value);
-        }
-    }
-
     private void showLabels() {
         labelsBox.getChildren().clear();
         for (LabelArrayReference lar : labelArrayReferences) {
@@ -170,6 +136,9 @@ public class Main extends Application {
     }
 
     private void addValueToSequence(TextField textFieldMaxCompartments, int value) {
+        if (textFieldMaxCompartments.getText().equals(""))
+            textFieldMaxCompartments.setText("10");
+
         int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
         // If there are not enough compartments, add a new
         // if (labelArrayReferences.size() < value) {
@@ -203,6 +172,9 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 buttonClear.setDisable(false);
+
+                if (textFieldMaxBalloonsInPackage.getText().equals(""))
+                    textFieldMaxBalloonsInPackage.setText("20");
 
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
 
@@ -330,6 +302,9 @@ public class Main extends Application {
         randomFillSequence.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                if (textFieldMaxBalloonsInCompartment.getText().equals(""))
+                    textFieldMaxBalloonsInCompartment.setText("20");
+
                 int maxBalloonsInCompartment = Integer.valueOf(textFieldMaxBalloonsInCompartment.getText());
 
                 Random random = new Random();
@@ -434,4 +409,37 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+    /* public static class DataObject {
+        SimpleIntegerProperty index, value;
+
+        public DataObject(int index, int value) {
+            this.index = new SimpleIntegerProperty(index);
+            this.value = new SimpleIntegerProperty(value);
+        }
+
+        public int getIndex() {
+            return index.get();
+        }
+
+        public SimpleIntegerProperty indexProperty() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index.set(index);
+        }
+
+        public int getValue() {
+            return value.get();
+        }
+
+        public SimpleIntegerProperty valueProperty() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value.set(value);
+        }
+    } */
 }
