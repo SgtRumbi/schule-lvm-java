@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -57,8 +58,8 @@ public class Main extends Application {
 
     private Label createItem() {
         Label sampleItem = new Label("2");
-        // sampleItem.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, new CornerRadii(12), new BorderWidths(6))));
-        sampleItem.setBackground(new Background(new BackgroundFill(new Color(0.8, 0.8, 0.8, 1.0), new CornerRadii(12), new Insets(2))));
+        sampleItem.setBackground(new Background(new BackgroundFill(new Color(0.8, 0.8, 0.8, 1.0), new CornerRadii(12),
+                new Insets(2))));
         sampleItem.setPadding(new Insets(10, 10, 20, 10));
         return sampleItem;
     }
@@ -84,11 +85,12 @@ public class Main extends Application {
         public void setClearing(boolean clearing) {
             this.clearing = clearing;
             if (clearing) {
-                // label.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, new CornerRadii(12), new BorderWidths(3))));
-                label.setBackground(new Background(new BackgroundFill(new Color(0.7, 0.7, 0.9, 1.0), new CornerRadii(12), new Insets(2))));
+                label.setBackground(new Background(new BackgroundFill(new Color(0.7, 0.7, 0.9, 1.0),
+                        new CornerRadii(12), new Insets(2))));
             } else {
                 // label.setBorder(null);
-                label.setBackground(new Background(new BackgroundFill(new Color(0.8, 0.8, 0.8, 1.0), new CornerRadii(12), new Insets(2))));
+                label.setBackground(new Background(new BackgroundFill(new Color(0.8, 0.8, 0.8, 1.0),
+                        new CornerRadii(12), new Insets(2))));
             }
         }
 
@@ -140,10 +142,11 @@ public class Main extends Application {
         labelFillSequence.setText(string);
     }
 
-    private void addValueToSequence(int compartments, int value) {
+    private void addValueToSequence(TextField textFieldMaxCompartments, int value) {
+        int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
         // If there are not enough compartments, add a new
         // if (labelArrayReferences.size() < value) {
-        if (labelArrayReferences.size() < compartments) {
+        if (labelArrayReferences.size() < compartmentsCount) {
             labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), value));
         } else {
             fillSequenceQueue.add(value);
@@ -156,13 +159,14 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(final Stage primaryStage) throws Exception {
         final TextField textFieldMaxBalloonsInPackage = createInputField("z. B. 20", 20);
         final TextField textFieldMaxBalloonsInCompartment = createInputField("z. B. 15", 10);
         final TextField textFieldMaxCompartments = createInputField("z. B. 10", 10);
 
         labelOutput = new Label("Output: -");
-        labelOutput.setBackground(new Background(new BackgroundFill(new Color(0.9, 0.7, 0.7, 1.0), new CornerRadii(12), new Insets(2))));
+        labelOutput.setBackground(new Background(new BackgroundFill(new Color(0.9, 0.7, 0.7, 1.0), new CornerRadii(12),
+                new Insets(2))));
         labelOutput.setPadding(new Insets(10));
 
         // final int[][] randomArray = {null};
@@ -182,7 +186,8 @@ public class Main extends Application {
 
                 // Create lars, if smaller then compartmentsCount
                 while (labelArrayReferences.size() < compartmentsCount && fillSequenceQueue.size() > 0) {
-                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1, fillSequenceQueue.poll()));
+                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1,
+                            fillSequenceQueue.poll()));
                     fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
                 }
 
@@ -256,12 +261,58 @@ public class Main extends Application {
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
 
-                addValueToSequence(compartmentCount, randomValue);
+                addValueToSequence(textFieldMaxCompartments, randomValue);
             }
         });
         Button definedFillSequence = new Button("Bestimmt");
+        definedFillSequence.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final Stage dialogStage = new Stage(StageStyle.UNIFIED);
 
-        ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(), updateFillSequence, randomFillSequence, definedFillSequence, labelFillSequenceDescription, labelFillSequence);
+                final TextField numberInput = createInputField("z. B. 10", 10);
+                final Label errorMessage = new Label("Bitte geben Sie eine Zahl ein");
+                errorMessage.setVisible(false);
+                Button submit = new Button("Ok");
+                submit.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        if (numberInput.getText().equals("")) {
+                            errorMessage.setVisible(true);
+                        } else {
+                            addValueToSequence(textFieldMaxCompartments, Integer.valueOf(numberInput.getText()));
+
+                            primaryStage.show();
+                            dialogStage.hide();
+                        }
+                    }
+                });
+                Button cancel = new Button("Abbrechen");
+                cancel.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        primaryStage.show();
+                        dialogStage.hide();
+                    }
+                });
+
+                VBox root = new VBox(new Label("Wert zum Hinzufügen:"), numberInput, errorMessage,
+                        new HBox(submit, cancel));
+
+                primaryStage.hide();
+                dialogStage.setScene(new Scene(root, 200, 200));
+                dialogStage.setAlwaysOnTop(true);
+                dialogStage.show();
+                /* alert.setTitle("Wert-Eingabe");
+                alert.setHeaderText("Neuer Wert");
+                String s = "This is an example of JavaFX 8 Dialogs... ";
+                alert.setContentText(s);
+                alert.getDialogPane().getChildren().addAll(new Button("Test")); */
+            }
+        });
+
+        ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(), updateFillSequence,
+                randomFillSequence, definedFillSequence, labelFillSequenceDescription, labelFillSequence);
         buttonContainer.setPadding(new Insets(5));
         // buttonContainer.setSpacing(5);
 
