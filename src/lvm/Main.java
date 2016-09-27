@@ -159,16 +159,7 @@ public class Main extends Application {
 
     private void updateFillSequenceLabel() {
         String string = "";
-        /* List<Integer> backup = new ArrayList<>();
-        for (int i = 0; i < fillSequenceQueue.size(); i++) {
-            int result = fillSequenceQueue.poll();
-            string += result + ", ";
-            backup.add(result);
-        }
 
-        for (int i : backup) {
-            fillSequenceQueue.add(i);
-        } */
         for (int i : fillSequenceInfoList) {
             string += i + ", ";
         }
@@ -203,10 +194,7 @@ public class Main extends Application {
                 new Insets(2))));
         labelOutput.setPadding(new Insets(10));
 
-        // final int[][] randomArray = {null};
-
-        // Button buttonFillRandom = new Button("Fülle");
-        final Button buttonCalculate = new Button("Sortiere");
+        final Button buttonCalculate = new Button("Sortieren");
         final Button buttonClear = new Button("Leeren");
         buttonClear.setDisable(true);
         buttonCalculate.setOnAction(new EventHandler<ActionEvent>() {
@@ -222,16 +210,6 @@ public class Main extends Application {
                 for (int i = 0; i < labelArrayReferences.size(); i++) {
                     array[i] = labelArrayReferences.get(i).value;
                 }
-
-                /* if (fillSequenceQueue.size() >= compartmentsCount) {
-                    array = new int[compartmentsCount];
-                } else {
-                    array = new int[fillSequenceQueue.size()];
-                }
-
-                for (int i = 0; i < array.length; i++) {
-                    array[i] = fillSequenceQueue.poll();
-                } */
 
                 echoArray(array);
 
@@ -354,7 +332,6 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 int maxBalloonsInCompartment = Integer.valueOf(textFieldMaxBalloonsInCompartment.getText());
-                // int compartmentCount = Integer.valueOf(textFieldMaxCompartments.getText());
 
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
@@ -407,13 +384,6 @@ public class Main extends Application {
         ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(),/* updateFillSequence, */
                 randomFillSequence, definedFillSequence, labelFillSequenceDescription, labelFillSequence);
         buttonContainer.setPadding(new Insets(5));
-        // buttonContainer.setSpacing(5);
-
-        /* LabelArrayReference lar = new LabelArrayReference(createItem(), 0, 1);
-        lar.setClearing(true);
-        HBox hBoxCompartments = new HBox(createItem(), createItem(), lar.getLabel());
-        hBoxCompartments.setPadding(new Insets(10));
-        hBoxCompartments.setSpacing(10); */
 
         labelsBox = new HBox();
         ScrollPane labelsBoxScrollPane = new ScrollPane(labelsBox);
@@ -463,11 +433,6 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        /* int[] array = generateRandomFilledArray(10, 20);
-        echoArray(array);
-
-        LVMResult result = LVM.lvmCalculate(array, 20);
-        System.out.println(result.toString()); */
         launch(args);
     }
 }
