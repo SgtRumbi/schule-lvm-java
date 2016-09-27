@@ -17,6 +17,8 @@ import javafx.stage.StageStyle;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+// TODO: 27.09.2016 Validate input
+
 /**
  * Created by Johannes on 27.09.2016.
  */
@@ -203,15 +205,12 @@ public class Main extends Application {
                 buttonClear.setDisable(false);
 
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
-                System.out.println("Deque size: " + fillSequenceQueue.size());
 
                 // Get the array from the already generated lars
                 int[] array = new int[labelArrayReferences.size()];
                 for (int i = 0; i < labelArrayReferences.size(); i++) {
                     array[i] = labelArrayReferences.get(i).value;
                 }
-
-                echoArray(array);
 
                 // Calculate result
                 LVMResult result = LVM.lvmCalculate(array, maxBalloonsInPackage);
