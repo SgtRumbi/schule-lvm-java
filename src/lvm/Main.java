@@ -140,6 +140,21 @@ public class Main extends Application {
         labelFillSequence.setText(string);
     }
 
+    private void addValueToSequence(int compartments, int value) {
+        // If there are not enough compartments, add a new
+        // if (labelArrayReferences.size() < value) {
+        if (labelArrayReferences.size() < compartments) {
+            labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), value));
+        } else {
+            fillSequenceQueue.add(value);
+            fillSequenceInfoList.add(value);
+        }
+
+        updateFillSequenceLabel();
+
+        showLabels();
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         final TextField textFieldMaxBalloonsInPackage = createInputField("z. B. 20", 20);
@@ -153,13 +168,23 @@ public class Main extends Application {
         // final int[][] randomArray = {null};
 
         // Button buttonFillRandom = new Button("Fülle");
-        Button buttonCalculate = new Button("Sortiere");
+        final Button buttonCalculate = new Button("Sortiere");
+        final Button buttonClear = new Button("Leeren");
+        buttonClear.setDisable(true);
         buttonCalculate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                buttonClear.setDisable(false);
+
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
-                // int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
+                int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
                 System.out.println("Deque size: " + fillSequenceQueue.size());
+
+                // Create lars, if smaller then compartmentsCount
+                while (labelArrayReferences.size() < compartmentsCount && fillSequenceQueue.size() > 0) {
+                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1, fillSequenceQueue.poll()));
+                    fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                }
 
                 // Get the array from the already generated lars
                 int[] array = new int[labelArrayReferences.size()];
@@ -193,22 +218,28 @@ public class Main extends Application {
                     labelArrayReferences.get(item.key).setClearing(true);
                 }
 
-                for (LabelArrayReference lar : labelArrayReferences) {
+                // Set output
+                setOutput(result);
+
+                updateFillSequenceLabel();
+
+                buttonCalculate.setDisable(true);
+            }
+        });
+        buttonClear.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                buttonClear.setDisable(true);
+
+                for (final LabelArrayReference lar : labelArrayReferences) {
                     if (lar.isClearing()) {
-                        /* System.out.println("Fill s q: " + fillSequenceQueue);
-                        int nextItem = fillSequenceQueue.poll();
-                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
-                        lar.update(nextItem); */
                         labelsBox.getChildren().remove(lar.getLabel());
                         lar.getLabel().setVisible(false);
                         labelArrayReferences.remove(lar);
                     }
                 }
 
-                // Set output
-                setOutput(result);
-
-                updateFillSequenceLabel();
+                buttonCalculate.setDisable(false);
             }
         });
 
@@ -222,34 +253,15 @@ public class Main extends Application {
                 int maxBalloonsInCompartment = Integer.valueOf(textFieldMaxBalloonsInCompartment.getText());
                 int compartmentCount = Integer.valueOf(textFieldMaxCompartments.getText());
 
-                System.out.println("Adding random to deque. size: " + fillSequenceQueue.size());
-
                 Random random = new Random();
                 int randomValue = random.nextInt(maxBalloonsInCompartment);
 
-                // If there are not enough compartments, add a new
-                if (labelArrayReferences.size() < compartmentCount) {
-                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), randomValue));
-                } else {
-                    fillSequenceQueue.add(randomValue);
-                    fillSequenceInfoList.add(randomValue);
-                }
-
-                System.out.println("Adding random to deque. size: " + fillSequenceQueue.size());
-
-                updateFillSequenceLabel();
-
-                /* randomArray[0] = generateRandomFilledArray(maxCompartments, maxBalloonsInCompartment);
-                labelArrayReferences.clear();
-                for (int i = 0; i < randomArray[0].length; i++) {
-                    labelArrayReferences.add(new LabelArrayReference(createItem(), i, randomArray[0][i]));
-                } */
-
-                showLabels();
+                addValueToSequence(compartmentCount, randomValue);
             }
         });
+        Button definedFillSequence = new Button("Bestimmt");
 
-        ToolBar buttonContainer = new ToolBar(buttonCalculate, new Separator(), labelFillSequenceDescription, labelFillSequence, updateFillSequence, randomFillSequence);
+        ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(), updateFillSequence, randomFillSequence, definedFillSequence, labelFillSequenceDescription, labelFillSequence);
         buttonContainer.setPadding(new Insets(5));
         // buttonContainer.setSpacing(5);
 
