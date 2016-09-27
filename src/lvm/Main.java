@@ -141,7 +141,6 @@ public class Main extends Application {
 
         int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
         // If there are not enough compartments, add a new
-        // if (labelArrayReferences.size() < value) {
         if (labelArrayReferences.size() < compartmentsCount) {
             labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size(), value));
         } else {
