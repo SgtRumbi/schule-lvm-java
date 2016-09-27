@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Johannes on 27.09.2016.
@@ -22,7 +23,7 @@ public class Main extends Application {
     /* private int inputMaxBalloonsInPackage = 0;
     private int inputMaxBalloonsInCompartment = 0;
     private int inputCompartmentsCount = 0; */
-    private final List<LabelArrayReference> labelArrayReferences = new ArrayList<>();
+    private final List<LabelArrayReference> labelArrayReferences = new CopyOnWriteArrayList<>();
     private HBox labelsBox;
     private Label labelOutput, labelFillSequence;
     private Queue<Integer> fillSequenceQueue = new ArrayDeque<>();
@@ -160,15 +161,6 @@ public class Main extends Application {
                 // int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
                 System.out.println("Deque size: " + fillSequenceQueue.size());
 
-                for (LabelArrayReference lar : labelArrayReferences) {
-                    if (lar.isClearing()) {
-                        System.out.println("Fill s q: " + fillSequenceQueue);
-                        int nextItem = fillSequenceQueue.poll();
-                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
-                        lar.update(nextItem);
-                    }
-                }
-
                 // Get the array from the already generated lars
                 int[] array = new int[labelArrayReferences.size()];
                 for (int i = 0; i < labelArrayReferences.size(); i++) {
@@ -199,6 +191,18 @@ public class Main extends Application {
                 for (int i = 0; i < result.lastMatch.length; i++) {
                     LVMLastMatchItem item = result.lastMatch[i];
                     labelArrayReferences.get(item.key).setClearing(true);
+                }
+
+                for (LabelArrayReference lar : labelArrayReferences) {
+                    if (lar.isClearing()) {
+                        /* System.out.println("Fill s q: " + fillSequenceQueue);
+                        int nextItem = fillSequenceQueue.poll();
+                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                        lar.update(nextItem); */
+                        labelsBox.getChildren().remove(lar.getLabel());
+                        lar.getLabel().setVisible(false);
+                        labelArrayReferences.remove(lar);
+                    }
                 }
 
                 // Set output
