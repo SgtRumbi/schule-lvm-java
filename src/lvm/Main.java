@@ -157,14 +157,24 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
-                int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
+                // int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
                 System.out.println("Deque size: " + fillSequenceQueue.size());
+
+                for (LabelArrayReference lar : labelArrayReferences) {
+                    if (lar.isClearing()) {
+                        System.out.println("Fill s q: " + fillSequenceQueue);
+                        int nextItem = fillSequenceQueue.poll();
+                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                        lar.update(nextItem);
+                    }
+                }
 
                 // Get the array from the already generated lars
                 int[] array = new int[labelArrayReferences.size()];
                 for (int i = 0; i < labelArrayReferences.size(); i++) {
                     array[i] = labelArrayReferences.get(i).value;
                 }
+
                 /* if (fillSequenceQueue.size() >= compartmentsCount) {
                     array = new int[compartmentsCount];
                 } else {
@@ -193,15 +203,6 @@ public class Main extends Application {
 
                 // Set output
                 setOutput(result);
-
-                for (LabelArrayReference lar : labelArrayReferences) {
-                    if (lar.isClearing()) {
-                        System.out.println("Fill s q: " + fillSequenceQueue);
-                        int nextItem = fillSequenceQueue.poll();
-                        fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
-                        lar.update(nextItem);
-                    }
-                }
 
                 updateFillSequenceLabel();
             }
