@@ -1,6 +1,7 @@
 package lvm;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -103,6 +104,39 @@ public class Main extends Application {
         }
     }
 
+    public static class DataObject {
+        SimpleIntegerProperty index, value;
+
+        public DataObject(int index, int value) {
+            this.index = new SimpleIntegerProperty(index);
+            this.value = new SimpleIntegerProperty(value);
+        }
+
+        public int getIndex() {
+            return index.get();
+        }
+
+        public SimpleIntegerProperty indexProperty() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index.set(index);
+        }
+
+        public int getValue() {
+            return value.get();
+        }
+
+        public SimpleIntegerProperty valueProperty() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value.set(value);
+        }
+    }
+
     private void showLabels() {
         labelsBox.getChildren().clear();
         for (LabelArrayReference lar : labelArrayReferences) {
@@ -181,15 +215,7 @@ public class Main extends Application {
                 buttonClear.setDisable(false);
 
                 int maxBalloonsInPackage = Integer.valueOf(textFieldMaxBalloonsInPackage.getText());
-                int compartmentsCount = Integer.valueOf(textFieldMaxCompartments.getText());
                 System.out.println("Deque size: " + fillSequenceQueue.size());
-
-                // Create lars, if smaller then compartmentsCount
-                while (labelArrayReferences.size() < compartmentsCount && fillSequenceQueue.size() > 0) {
-                    labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1,
-                            fillSequenceQueue.poll()));
-                    fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
-                }
 
                 // Get the array from the already generated lars
                 int[] array = new int[labelArrayReferences.size()];
@@ -241,8 +267,18 @@ public class Main extends Application {
                         labelsBox.getChildren().remove(lar.getLabel());
                         lar.getLabel().setVisible(false);
                         labelArrayReferences.remove(lar);
+
+                        if (fillSequenceQueue.size() > 0) {
+                            int value = fillSequenceQueue.poll();
+                            labelArrayReferences.add(new LabelArrayReference(createItem(), labelArrayReferences.size() - 1,
+                                    value));
+                            fillSequenceInfoList.remove(fillSequenceInfoList.size() - 1);
+                        }
                     }
                 }
+
+                showLabels();
+                updateFillSequenceLabel();
 
                 buttonCalculate.setDisable(false);
             }
@@ -250,17 +286,50 @@ public class Main extends Application {
 
         Label labelFillSequenceDescription = new Label("Füllfolge: ");
         labelFillSequence = new Label("-");
-        Button updateFillSequence = new Button("Anpassen");
+        /* Button updateFillSequence = new Button("Anpassen");
         updateFillSequence.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 final Stage dialogStage = new Stage(StageStyle.DECORATED);
+
+                TableView<DataObject> table = new TableView<>();
+                table.setEditable(true);
+
+                TableColumn<DataObject, Integer> indexColumn = new TableColumn<>("Index");
+                indexColumn.setCellValueFactory(new PropertyValueFactory<DataObject, Integer>("Index"));
+                TableColumn<DataObject, Integer> valueColumn = new TableColumn<>("Wert");
+                valueColumn.setCellValueFactory(new PropertyValueFactory<DataObject, Integer>("Wert"));
+                valueColumn.setOnEditCommit(
+                        new EventHandler<TableColumn.CellEditEvent<DataObject, Integer>>() {
+                            @Override
+                            public void handle(TableColumn.CellEditEvent<DataObject, Integer> t) {
+                                t.getTableView().getItems().get(
+                                        t.getTablePosition().getRow()).setValue(t.getNewValue());
+                            }
+                        }
+                );
+
+                List<DataObject> dataObjectList = new ArrayList<>();
+                for (int i = 0; i < fillSequenceQueue.size(); i++) {
+                    dataObjectList.add(new DataObject(i, fillSequenceQueue.poll()));
+                }
+                fillSequenceInfoList.clear();
+                updateFillSequenceLabel();
+
+                ObservableList<DataObject> dataObjects = FXCollections.observableArrayList(dataObjectList);
+
+                table.setItems(dataObjects);
+
+                table.getColumns().addAll(indexColumn, valueColumn);
 
                 Button submit = new Button("Ok");
                 submit.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
 
+
+                        primaryStage.show();
+                        dialogStage.hide();
                     }
                 });
                 Button cancel = new Button("Abbrechen");
@@ -272,14 +341,14 @@ public class Main extends Application {
                     }
                 });
 
-                VBox root = new VBox(new Label("Wert zum Hinzufügen:"), new HBox(submit, cancel));
+                VBox root = new VBox(new Label("Editieren:"), table, new HBox(submit, cancel));
 
                 primaryStage.hide();
                 dialogStage.setScene(new Scene(root, 200, 200));
                 dialogStage.setAlwaysOnTop(true);
                 dialogStage.show();
             }
-        });
+        }); */
         Button randomFillSequence = new Button("Zufällig");
         randomFillSequence.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -335,7 +404,7 @@ public class Main extends Application {
             }
         });
 
-        ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(), updateFillSequence,
+        ToolBar buttonContainer = new ToolBar(buttonCalculate, buttonClear, new Separator(),/* updateFillSequence, */
                 randomFillSequence, definedFillSequence, labelFillSequenceDescription, labelFillSequence);
         buttonContainer.setPadding(new Insets(5));
         // buttonContainer.setSpacing(5);
